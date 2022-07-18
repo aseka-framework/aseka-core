@@ -1,0 +1,65 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    networks:
+      - aseka
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: aseka
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+  oracle:
+    image: "larmic/oracle-xe:18.4.0"
+    ports:
+      - "1521:1521"
+    networks:
+      - aseka
+    environment:
+      ORACLE_PWD: test
+  rabbitmq:
+    image: "rabbitmq:management"
+    networks:
+      - aseka
+    ports:
+      - "5677:5672"
+      - "15677:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 20s
+      timeout: 30s
+      retries: 3
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    networks:
+      - aseka
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+  # to produce message execute inside container: kafka-console-producer.sh --bootstrap-server localhost:9092 --topic topic name
+  kafka:
+    depends_on:
+      - zookeeper
+    image: 'bitnami/kafka:latest'
+    ports:
+      - "9092:9092"
+    networks:
+      - aseka
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_LISTENERS=INNER://kafka:29092,OUTER://:9092
+      - KAFKA_ADVERTISED_LISTENERS=INNER://kafka:29092,OUTER://127.0.0.1:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INNER:PLAINTEXT,OUTER:PLAINTEXT
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INNER
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+  wiremock:
+    image: wiremock/wiremock:latest
+    ports:
+      - "8484:8080"
+    networks:
+      - aseka
+
+networks:
+  aseka:
+    driver: bridge

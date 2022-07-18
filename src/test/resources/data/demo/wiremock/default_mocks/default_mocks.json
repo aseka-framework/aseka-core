@@ -1,0 +1,14 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "GET",
+    "url": "/wiremock/test"
+  },
+  "response": {
+    "status": 201,
+    "body": "It is default mappings",
+    "headers": {
+      "Content-Type": "text/plain"
+    }
+  }
+}
