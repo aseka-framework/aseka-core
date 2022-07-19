@@ -11,13 +11,17 @@ services:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
   oracle:
-    image: "larmic/oracle-xe:18.4.0"
+    image: "pvargacl/oracle-xe-18.4.0"
     ports:
       - "1521:1521"
     networks:
       - aseka
     environment:
       ORACLE_PWD: test
+    healthcheck:
+      test: sh /opt/oracle/checkDBStatus.sh
+      retries: 20
+      interval: 10s
   rabbitmq:
     image: "rabbitmq:management"
     networks:

@@ -13,9 +13,6 @@ public class DockerProperties {
 
     private boolean enabled = false;
     private List<String> composeFiles;
-
-    //TODO write own testcontainer with default wating healthcheck .waitingFor("rabbitmq", Wait.forHealthcheck());
-    // based on https://github.com/testcontainers/testcontainers-java
-    private long postStartDelay = 2000;
+    private Integer waitAfterStartSeconds = null;
 
 }
