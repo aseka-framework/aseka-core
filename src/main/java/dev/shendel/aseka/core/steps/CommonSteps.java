@@ -9,8 +9,8 @@ import dev.shendel.aseka.core.cucumber.type.Triple;
 import dev.shendel.aseka.core.exception.AsekaException;
 import dev.shendel.aseka.core.matcher.AsekaMatcher;
 import dev.shendel.aseka.core.matcher.IsEqualFile;
-import dev.shendel.aseka.core.matcher.global.GlobalMatcher;
-import dev.shendel.aseka.core.matcher.global.GlobalMatcherFactory;
+import dev.shendel.aseka.core.matcher.object.ObjectMatcher;
+import dev.shendel.aseka.core.matcher.object.ObjectMatcherFactory;
 import dev.shendel.aseka.core.service.FileManager;
 import dev.shendel.aseka.core.service.StringInterpolator;
 import dev.shendel.aseka.core.util.Asserts;
@@ -36,7 +36,7 @@ public class CommonSteps {
     private final StepChainExecutor stepChainExecutor;
     private final StringInterpolator stringInterpolator;
     private final ContextVariables contextVariables;
-    private final GlobalMatcherFactory globalMatcherFactory;
+    private final ObjectMatcherFactory objectMatcherFactory;
     private final FileManager fileManager;
 
     @When("set variables:")
@@ -74,8 +74,8 @@ public class CommonSteps {
     }
 
     @When("set global matcher {global_matcher}")
-    public void setGlobalMatcher(GlobalMatcher globalMatcher) {
-        globalMatcherFactory.setGlobalMatcher(globalMatcher);
+    public void setGlobalMatcher(ObjectMatcher objectMatcher) {
+        objectMatcherFactory.setGlobalMatcher(objectMatcher);
     }
 
     @SneakyThrows

@@ -1,5 +1,6 @@
-package dev.shendel.aseka.core.matcher.global;
+package dev.shendel.aseka.core.matcher.object;
 
+import lombok.experimental.UtilityClass;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -7,8 +8,8 @@ import org.hamcrest.TypeSafeMatcher;
 
 import java.util.function.Function;
 
-
-public class JsonUnitMatchers {
+@UtilityClass
+public class ParametrizedMatchers {
 
     public static Matcher<?> containsString() {
         return ParametrizedMatcher.createWithDelegate(Matchers::containsString);

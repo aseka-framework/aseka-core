@@ -1,4 +1,4 @@
-package dev.shendel.aseka.core.matcher.global;
+package dev.shendel.aseka.core.matcher.object;
 
 import dev.shendel.aseka.core.matcher.AsekaMatcher;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +18,14 @@ public class IsEqualJson extends TypeSafeMatcher<String> {
     private static final String FULL_JSON = "fullJson";
     private static final String ROOT = "";
     //TODO move to factory
+    //TODO think about two matchers
     public static final Configuration DEFAULT_JSON_UNIT_CFG = Configuration.empty()
             .withOptions(IGNORING_ARRAY_ORDER)
             .withOptions(IGNORING_EXTRA_FIELDS)
-            .withMatcher(AsekaMatcher.CONTAINS.getName(), JsonUnitMatchers.containsString())
-            .withMatcher(AsekaMatcher.NOT_CONTAINS.getName(), JsonUnitMatchers.notContainsString())
-            .withMatcher(AsekaMatcher.NOT_BLANK_STRING.getName(), JsonUnitMatchers.notBlank())
-            .withMatcher(AsekaMatcher.IS_BLANK_STRING.getName(), JsonUnitMatchers.isBlank());
+            .withMatcher(AsekaMatcher.CONTAINS.getName(), ParametrizedMatchers.containsString())
+            .withMatcher(AsekaMatcher.NOT_CONTAINS.getName(), ParametrizedMatchers.notContainsString())
+            .withMatcher(AsekaMatcher.NOT_BLANK_STRING.getName(), ParametrizedMatchers.notBlank())
+            .withMatcher(AsekaMatcher.IS_BLANK_STRING.getName(), ParametrizedMatchers.isBlank());
     //            .withMatcher("formattedAs", new DateFormatMatcher())
     //            .withMatcher("formattedAndWithin", DateWithin.Companion.param())
     //            .withMatcher("formattedAndWithinNow", DateWithin.Companion.now())

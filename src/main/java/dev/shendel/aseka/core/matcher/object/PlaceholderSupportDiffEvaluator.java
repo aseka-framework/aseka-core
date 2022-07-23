@@ -1,4 +1,4 @@
-package dev.shendel.aseka.core.matcher.global;
+package dev.shendel.aseka.core.matcher.object;
 
 import net.javacrumbs.jsonunit.core.Configuration;
 import net.javacrumbs.jsonunit.core.ParametrizedMatcher;

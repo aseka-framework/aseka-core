@@ -6,7 +6,7 @@ import dev.shendel.aseka.core.cucumber.type.HttpBodyValidator;
 import dev.shendel.aseka.core.cucumber.type.InterpolatedString;
 import dev.shendel.aseka.core.cucumber.type.Pair;
 import dev.shendel.aseka.core.exception.AsekaException;
-import dev.shendel.aseka.core.matcher.global.GlobalMatcherFactory;
+import dev.shendel.aseka.core.matcher.object.ObjectMatcherFactory;
 import dev.shendel.aseka.core.service.FileManagerImpl;
 import dev.shendel.aseka.core.util.Asserts;
 import dev.shendel.aseka.core.util.Validator;
@@ -44,7 +44,7 @@ public class HttpSteps {
     private final ContextVariables contextVariables;
     private final FileManagerImpl fileLoader;
     private final RestAssuredConfiguration restAssuredConfig;
-    private final GlobalMatcherFactory globalMatcherFactory;
+    private final ObjectMatcherFactory objectMatcherFactory;
 
     @Getter @Setter
     private RequestSpecification specification;
@@ -206,12 +206,12 @@ public class HttpSteps {
     public void checkBodyWithGlobalMatcher(String filePath) {
         String expected = fileLoader.readFileAsString(filePath);
         Allure.addAttachment("expected", expected);
-        validatableResponse.assertThat().body(globalMatcherFactory.create(expected));
+        validatableResponse.assertThat().body(objectMatcherFactory.create(expected));
     }
 
     @Then("check that response body is:")
     public void checkBodyWithGlobalMatcher(InterpolatedString expected) {
-        validatableResponse.assertThat().body(globalMatcherFactory.create(expected.get()));
+        validatableResponse.assertThat().body(objectMatcherFactory.create(expected.get()));
     }
 
 }

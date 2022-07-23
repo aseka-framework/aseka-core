@@ -4,7 +4,7 @@ import dev.shendel.aseka.core.cucumber.executor.RetryableStep;
 import dev.shendel.aseka.core.cucumber.type.InterpolatedString;
 import dev.shendel.aseka.core.extension.kafka.KafkaExtension;
 import dev.shendel.aseka.core.extension.kafka.KafkaMessage;
-import dev.shendel.aseka.core.matcher.global.GlobalMatcherFactory;
+import dev.shendel.aseka.core.matcher.object.ObjectMatcherFactory;
 import dev.shendel.aseka.core.service.FileManager;
 import io.cucumber.java.en.When;
 import io.qameta.allure.Allure;
@@ -21,7 +21,7 @@ public class KafkaSteps {
 
     private final FileManager fileManager;
     private final KafkaExtension extension;
-    private final GlobalMatcherFactory globalMatcherFactory;
+    private final ObjectMatcherFactory objectMatcherFactory;
 
     @When("send to topic {interpolated_string} message:")
     public void sendMessage(String topicName, InterpolatedString message) {
@@ -57,7 +57,7 @@ public class KafkaSteps {
     private void checkMessageInternal(String topicName, String expectedMessage) {
         KafkaMessage actualMessage = extension.receiveMessage(topicName);
         log.info("Checking actual message: {}", actualMessage);
-        assertThat(actualMessage.getBody(), globalMatcherFactory.create(expectedMessage));
+        assertThat(actualMessage.getBody(), objectMatcherFactory.create(expectedMessage));
     }
 
 }

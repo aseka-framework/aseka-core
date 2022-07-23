@@ -1,12 +1,15 @@
-package dev.shendel.aseka.core.matcher.global;
+package dev.shendel.aseka.core.matcher.object;
 
 import dev.shendel.aseka.core.exception.AsekaException;
 import dev.shendel.aseka.core.matcher.AsekaMatcher;
+import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
-public class GlobalMatcherHelper {
+@UtilityClass
+//TODO rename it is not Object matcher
+public class ObjectMatcherHelper {
 
     public static final String DELIMITER = "::";
 

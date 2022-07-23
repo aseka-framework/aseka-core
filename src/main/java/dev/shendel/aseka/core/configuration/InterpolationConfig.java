@@ -2,7 +2,7 @@ package dev.shendel.aseka.core.configuration;
 
 import dev.shendel.aseka.core.api.InterpolationHelper;
 import dev.shendel.aseka.core.api.InterpolatorHelpersSupplier;
-import dev.shendel.aseka.core.matcher.global.GlobalMatcherHelper;
+import dev.shendel.aseka.core.matcher.object.ObjectMatcherHelper;
 import dev.shendel.aseka.core.util.InterpolatorFunctions;
 import dev.shendel.aseka.core.service.FileManager;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +18,7 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class InterpolationConfig {
+    //TODO add registrator with method
 
     @Bean
     public InterpolatorHelpersSupplier defaultInterpolatorHelpers(@Lazy FileManager fileManager) {
@@ -39,7 +40,7 @@ public class InterpolationConfig {
     public InterpolatorHelpersSupplier matcherHelper() {
         return () -> {
             List<InterpolationHelper> helpers = new ArrayList<>();
-            helpers.add(InterpolationHelper.of("matcher", GlobalMatcherHelper.getFunction()));
+            helpers.add(InterpolationHelper.of("matcher", ObjectMatcherHelper.getFunction()));
             return helpers;
         };
     }

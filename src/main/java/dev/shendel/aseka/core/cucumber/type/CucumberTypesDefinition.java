@@ -5,7 +5,7 @@ import dev.shendel.aseka.core.cucumber.parser.MatcherFactory;
 import dev.shendel.aseka.core.cucumber.parser.Type;
 import dev.shendel.aseka.core.extension.db.SqlScriptType;
 import dev.shendel.aseka.core.matcher.AsekaMatcher;
-import dev.shendel.aseka.core.matcher.global.GlobalMatcher;
+import dev.shendel.aseka.core.matcher.object.ObjectMatcher;
 import dev.shendel.aseka.core.service.StringInterpolator;
 import dev.shendel.aseka.core.util.StringUtil;
 import io.cucumber.java.DataTableType;
@@ -57,9 +57,9 @@ public class CucumberTypesDefinition {
         return AsekaMatcher.getBy(matcherSymbol);
     }
 
-    @ParameterType(name = "global_matcher", value = GlobalMatcher.REGEX)
-    public GlobalMatcher global_matcher(String globalMatcherName) {
-        return GlobalMatcher.valueOf(globalMatcherName);
+    @ParameterType(name = "global_matcher", value = ObjectMatcher.REGEX)
+    public ObjectMatcher global_matcher(String globalMatcherName) {
+        return ObjectMatcher.valueOf(globalMatcherName);
     }
 
     @DataTableType

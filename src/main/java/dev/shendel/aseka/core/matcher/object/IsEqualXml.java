@@ -1,4 +1,4 @@
-package dev.shendel.aseka.core.matcher.global;
+package dev.shendel.aseka.core.matcher.object;
 
 import dev.shendel.aseka.core.exception.AsekaAssertionError;
 import dev.shendel.aseka.core.exception.AsekaException;
@@ -14,7 +14,7 @@ import org.xmlunit.diff.NodeMatcher;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.StringReader;
 
-import static dev.shendel.aseka.core.matcher.global.IsEqualJson.DEFAULT_JSON_UNIT_CFG;
+import static dev.shendel.aseka.core.matcher.object.IsEqualJson.DEFAULT_JSON_UNIT_CFG;
 import static org.xmlunit.diff.ElementSelectors.byName;
 import static org.xmlunit.diff.ElementSelectors.byNameAndText;
 

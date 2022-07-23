@@ -4,7 +4,7 @@ import dev.shendel.aseka.core.cucumber.executor.RetryableStep;
 import dev.shendel.aseka.core.cucumber.type.InterpolatedString;
 import dev.shendel.aseka.core.extension.amqp.AmqpExtension;
 import dev.shendel.aseka.core.extension.amqp.model.MqMessage;
-import dev.shendel.aseka.core.matcher.global.GlobalMatcherFactory;
+import dev.shendel.aseka.core.matcher.object.ObjectMatcherFactory;
 import dev.shendel.aseka.core.service.FileManager;
 import io.cucumber.java.en.When;
 import io.qameta.allure.Allure;
@@ -21,7 +21,7 @@ public class AmqpSteps {
 
     private final FileManager fileManager;
     private final AmqpExtension extension;
-    private final GlobalMatcherFactory globalMatcherFactory;
+    private final ObjectMatcherFactory objectMatcherFactory;
 
     @When("send to queue {interpolated_string} message:")
     public void sendMessage(String queueName, InterpolatedString message) {
@@ -57,7 +57,7 @@ public class AmqpSteps {
     private void checkMessageInternal(String queueName, String expectedMessage) {
         MqMessage actualMessage = extension.receiveMessage(queueName);
         log.info("Checking actual message: {}", actualMessage);
-        assertThat(actualMessage.getBody(), globalMatcherFactory.create(expectedMessage));
+        assertThat(actualMessage.getBody(), objectMatcherFactory.create(expectedMessage));
     }
 
 }
