@@ -9,6 +9,7 @@ import io.restassured.config.RestAssuredConfig;
 import io.restassured.config.SSLConfig;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -39,7 +40,9 @@ public class RestAssuredConfiguration {
     public RequestSpecification getSpec() {
         RequestSpecification specification = given()
                 .config(buildConfig())
-                .filter(new AllureRestAssured());
+                .filter(new AllureRestAssured())
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON);
 
         if (httpProperties.isLogsEnabled()) {
             specification
