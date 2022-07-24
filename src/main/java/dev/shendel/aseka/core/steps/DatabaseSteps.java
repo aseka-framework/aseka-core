@@ -76,7 +76,14 @@ public class DatabaseSteps {
     @SuppressWarnings("unchecked")
     public void checkResponseSize(AsekaMatcher asekaMatcher, Integer expectedRecordsNumber) {
         Matcher matcher = MatcherFactory.create(asekaMatcher, expectedRecordsNumber);
-        Asserts.assertThat(actualRecords.size(), matcher, "Wrong sql records count");
+        Asserts.assertThat(
+                actualRecords.size(),
+                matcher,
+                "Wrong sql records count. Expected: {} {}, Actual: {}",
+                asekaMatcher.getName(),
+                expectedRecordsNumber,
+                actualRecords.size()
+        );
     }
 
     @Then("check response record(s):")
