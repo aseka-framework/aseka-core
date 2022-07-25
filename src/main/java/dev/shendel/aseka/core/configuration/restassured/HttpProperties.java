@@ -11,7 +11,7 @@ public class HttpProperties {
 
     private Integer timeout = 60000;
 
-    private boolean logsEnabled = false;
+    private boolean logsEnabled = true;
 
     private String baseUrl;
 
