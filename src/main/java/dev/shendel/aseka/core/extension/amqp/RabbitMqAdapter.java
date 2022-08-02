@@ -1,5 +1,6 @@
 package dev.shendel.aseka.core.extension.amqp;
 
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -7,6 +8,7 @@ import dev.shendel.aseka.core.configuration.AmqpProperties;
 import dev.shendel.aseka.core.exception.AsekaException;
 import dev.shendel.aseka.core.extension.amqp.model.AmqpBrokerType;
 import dev.shendel.aseka.core.extension.amqp.model.Broker;
+import dev.shendel.aseka.core.extension.amqp.model.MessageProperties;
 import dev.shendel.aseka.core.extension.amqp.model.MqMessage;
 import dev.shendel.aseka.core.extension.amqp.model.Queue;
 import lombok.RequiredArgsConstructor;
@@ -40,19 +42,45 @@ public class RabbitMqAdapter implements AmqpAdapter {
     }
 
     @Override
-    public void sendToQueue(String queueName, String body) {
+    public void sendToQueue(String queueName, MessageProperties props, String body) {
         Queue queue = properties.getQueueByName(queueName);
         Channel channel = channels.get(queue);
         try {
-            //TODO add exchange from properties
             channel.basicPublish(
                     queue.getExchange(),
                     queue.getName(),
-                    null,
+                    convertToRabbitProps(props),
                     body.getBytes(StandardCharsets.UTF_8)
             );
         } catch (IOException exception) {
             throw new AsekaException("Error sending message to {}", exception, queueName);
+        }
+    }
+
+    private AMQP.BasicProperties convertToRabbitProps(MessageProperties props) {
+        if (props.isEmpty()) {
+            return null;
+        } else {
+            return new AMQP.BasicProperties(
+                    props.getContentType(),
+                    props.getContentEncoding(),
+                    new HashMap<String, Object>() {
+                        {
+                            putAll(props.getHeaders());
+                        }
+                    },
+                    props.getDeliveryMode(),
+                    props.getPriority(),
+                    props.getCorrelationId(),
+                    props.getReplyTo(),
+                    props.getExpiration(),
+                    props.getMessageId(),
+                    props.getTimestamp(),
+                    props.getType(),
+                    props.getUserId(),
+                    props.getAppId(),
+                    props.getClusterId()
+            );
         }
     }
 

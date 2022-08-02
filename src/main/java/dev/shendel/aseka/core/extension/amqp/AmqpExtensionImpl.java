@@ -3,6 +3,7 @@ package dev.shendel.aseka.core.extension.amqp;
 import dev.shendel.aseka.core.configuration.AmqpProperties;
 import dev.shendel.aseka.core.exception.AsekaException;
 import dev.shendel.aseka.core.extension.amqp.model.Broker;
+import dev.shendel.aseka.core.extension.amqp.model.MessageProperties;
 import dev.shendel.aseka.core.extension.amqp.model.MqMessage;
 import dev.shendel.aseka.core.util.Validator;
 import lombok.Data;
@@ -33,8 +34,8 @@ public class AmqpExtensionImpl implements AmqpExtension {
     }
 
     @Override
-    public void sendToQueue(String queueName, String body) {
-        getAdapterFor(queueName).sendToQueue(queueName, body);
+    public void sendToQueue(String queueName, MessageProperties props, String body) {
+        getAdapterFor(queueName).sendToQueue(queueName, props, body);
     }
 
     @Override
