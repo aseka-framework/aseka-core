@@ -42,7 +42,7 @@ public class HttpSteps {
     private static final String TEMP_HTTP_FOLDER = "temp/http";
 
     private final ContextVariables contextVariables;
-    private final FileManagerImpl fileLoader;
+    private final FileManagerImpl fileManager;
     private final RestAssuredConfiguration restAssuredConfig;
     private final ObjectMatcherFactory objectMatcherFactory;
 
@@ -102,7 +102,7 @@ public class HttpSteps {
 
     @When("set request body {file_path}")
     public void setBodyByPath(String path) {
-        String body = fileLoader.readFileAsString(path);
+        String body = fileManager.readFileAsString(path);
         specification.and().body(body);
     }
 
@@ -111,9 +111,22 @@ public class HttpSteps {
         specification.and().body(body.get());
     }
 
+    @When("set multiPart body:")
+    public void sendRequest(List<Pair> parts) {
+        for (Pair part : parts) {
+            String partName = part.getFirst();
+            String filePath = part.getSecond();
+            if (fileManager.isTextFile(filePath)) {
+                specification.multiPart(partName, fileManager.readFileAsString(filePath));
+            } else {
+                specification.multiPart(partName, fileManager.getFile(filePath));
+            }
+        }
+    }
+
     @When("send request {http_method}:{interpolated_string} with body {file_path}")
     public void sendRequestWithBodyByPath(Method method, String endpoint, String bodyPath) {
-        String body = fileLoader.readFileAsString(bodyPath);
+        String body = fileManager.readFileAsString(bodyPath);
         sendRequest(method, endpoint, body);
     }
 
@@ -152,7 +165,7 @@ public class HttpSteps {
         Validator.checkDownloadFolder(path, TEMP_HTTP_FOLDER);
 
         try (InputStream inputStream = response.getBody().asInputStream()) {
-            File file = fileLoader.createFile(path, inputStream);
+            File file = fileManager.createFile(path, inputStream);
         } catch (Exception e) {
             throw new AsekaException("Can't download file", e);
         }
@@ -190,21 +203,21 @@ public class HttpSteps {
 
     @Then("check response body by JSON Schema {file_path}")
     public void checkResponseByJsonSchema(String jsonFilePath) {
-        String jsonSchema = fileLoader.readFileAsString(jsonFilePath);
+        String jsonSchema = fileManager.readFileAsString(jsonFilePath);
         Allure.addAttachment("jsonSchema", jsonSchema);
         validatableResponse.assertThat().body(matchesJsonSchema(jsonSchema));
     }
 
     @Then("check response body by XSD {file_path}")
     public void checkResponseByXsdSchema(String filePath) {
-        String xsdSchema = fileLoader.readFileAsString(filePath);
+        String xsdSchema = fileManager.readFileAsString(filePath);
         Allure.addAttachment("xsdSchema", xsdSchema);
         validatableResponse.assertThat().body(matchesXsd(xsdSchema));
     }
 
     @Then("check that response body is {file_path}")
     public void checkBodyWithGlobalMatcher(String filePath) {
-        String expected = fileLoader.readFileAsString(filePath);
+        String expected = fileManager.readFileAsString(filePath);
         Allure.addAttachment("expected", expected);
         validatableResponse.assertThat().body(objectMatcherFactory.create(expected));
     }

@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,7 +31,12 @@ public class AmqpSteps {
     private final ObjectMatcherFactory objectMatcherFactory;
 
     @Getter @Setter
-    private MessageProperties messageProperties = new MessageProperties();
+    private MessageProperties messageProperties;
+
+    @PostConstruct
+    public void initBeforeEveryCase() {
+        messageProperties = new MessageProperties();
+    }
 
     @When("set mq message headers:")
     public void setMessageHeaders(List<Pair> headers) {

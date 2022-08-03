@@ -125,6 +125,12 @@ public final class FileManagerImpl implements FileManager {
         }
     }
 
+    @Override
+    public boolean isTextFile(String filePath) {
+        Resource file = loader.getResource(filePath);
+        return isTextFile(file);
+    }
+
     private String readAsResolvedString(Resource resource) {
         try (
                 InputStreamReader reader = new InputStreamReader(resource.getInputStream(), UTF_8);

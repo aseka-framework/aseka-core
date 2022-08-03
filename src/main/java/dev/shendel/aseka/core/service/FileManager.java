@@ -24,4 +24,6 @@ public interface FileManager extends Cleanable {
 
     List<String> readFilesAsString(String filesLocationPattern);
 
+    boolean isTextFile(String filePath);
+
 }
