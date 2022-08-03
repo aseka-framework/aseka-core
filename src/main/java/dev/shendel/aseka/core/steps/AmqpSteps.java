@@ -1,6 +1,5 @@
 package dev.shendel.aseka.core.steps;
 
-import dev.shendel.aseka.core.api.Cleanable;
 import dev.shendel.aseka.core.cucumber.executor.RetryableStep;
 import dev.shendel.aseka.core.cucumber.type.InterpolatedString;
 import dev.shendel.aseka.core.cucumber.type.Pair;
@@ -11,8 +10,9 @@ import dev.shendel.aseka.core.matcher.object.ObjectMatcherFactory;
 import dev.shendel.aseka.core.service.FileManager;
 import io.cucumber.java.en.When;
 import io.qameta.allure.Allure;
-import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -21,15 +21,15 @@ import java.util.stream.Collectors;
 
 import static dev.shendel.aseka.core.util.Asserts.assertThat;
 
-@Data
 @Slf4j
 @RequiredArgsConstructor
-public class AmqpSteps implements Cleanable {
+public class AmqpSteps {
 
     private final FileManager fileManager;
     private final AmqpExtension extension;
     private final ObjectMatcherFactory objectMatcherFactory;
 
+    @Getter @Setter
     private MessageProperties messageProperties = new MessageProperties();
 
     @When("set mq message headers:")
@@ -74,12 +74,6 @@ public class AmqpSteps implements Cleanable {
         MqMessage actualMessage = extension.receiveMessage(queueName);
         log.info("Checking actual message: {}", actualMessage);
         assertThat(actualMessage.getBody(), objectMatcherFactory.create(expectedMessage));
-    }
-
-
-    @Override
-    public void clean() {
-        messageProperties = new MessageProperties();
     }
 
 }

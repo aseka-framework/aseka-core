@@ -36,8 +36,11 @@ public class RetryExecutor {
     public void execute(Runnable runnable) {
         Retry retry = Retry.of("retry", retryConfig);
         Retry.Context<Object> context = retry.context();
-        retry.getEventPublisher().onRetry(errorEvent -> {
-            log.info("Attempt {} failed", errorEvent.getNumberOfRetryAttempts());
+        retry.getEventPublisher().onSuccess(event -> {
+            log.info("Attempt {} passed", event.getNumberOfRetryAttempts() + 1);
+        });
+        retry.getEventPublisher().onRetry(event -> {
+            log.info("Attempt {} failed", event.getNumberOfRetryAttempts());
         });
         do {
             try {

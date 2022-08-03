@@ -129,11 +129,25 @@ public class CommonSteps {
     }
 
     @StepExecutorIgnore
+    @When("---- retry {int} second(s)")
+    public void startRetryStepsChainV2(int retryNoLongerThan) {
+        stepChainExecutor.enable(retryNoLongerThan);
+    }
+
+    @StepExecutorIgnore
+    @When("---- end retryable block")
+    public void stopStepsChainV2() {
+        stepChainExecutor.execute();
+    }
+
+    @Deprecated
+    @StepExecutorIgnore
     @When("---- start retryable steps block. Retry no longer than {int} second(s).")
     public void startRetryStepsChain(int retryNoLongerThan) {
         stepChainExecutor.enable(retryNoLongerThan);
     }
 
+    @Deprecated
     @StepExecutorIgnore
     @When("---- end retryable steps block")
     public void stopStepsChain() {

@@ -8,13 +8,11 @@ import dev.shendel.aseka.core.matcher.object.ObjectMatcherFactory;
 import dev.shendel.aseka.core.service.FileManager;
 import io.cucumber.java.en.When;
 import io.qameta.allure.Allure;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import static dev.shendel.aseka.core.util.Asserts.assertThat;
 
-@Data
 @Slf4j
 @RequiredArgsConstructor
 public class KafkaSteps {
