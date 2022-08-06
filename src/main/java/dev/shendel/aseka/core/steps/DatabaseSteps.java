@@ -20,10 +20,14 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.hamcrest.Matcher;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -73,7 +77,7 @@ public class DatabaseSteps {
     }
 
     @Then("check that response records count {matcher} {int}")
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"rawtypes"})
     public void checkResponseSize(AsekaMatcher asekaMatcher, Integer expectedRecordsNumber) {
         Matcher matcher = MatcherFactory.create(asekaMatcher, expectedRecordsNumber);
         Asserts.assertThat(
@@ -89,9 +93,22 @@ public class DatabaseSteps {
     @Then("check response record(s):")
     public void checkResponseRecords(List<Map<String, String>> expectedRecords) {
         expectedRecords = expectedRecords.stream()
-                .map(stringInterpolator::interpolate)
+                .map(interpolateRecords())
                 .collect(toList());
         Asserts.assertThat(actualRecords, ContainsSqlRecords.containsSqlRecords(expectedRecords));
+    }
+
+    private Function<Map<String, String>, Map<String, String>> interpolateRecords() {
+        return map -> map.entrySet()
+                .stream()
+                .collect(
+                        LinkedHashMap::new,
+                        (newMap, entry) -> newMap.put(
+                                stringInterpolator.interpolate(entry.getKey()),
+                                stringInterpolator.interpolate(entry.getValue())
+                        ),
+                        LinkedHashMap::putAll
+                );
     }
 
     @When("get variables from {int} row in response:")

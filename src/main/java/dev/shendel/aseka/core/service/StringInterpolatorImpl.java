@@ -70,15 +70,4 @@ public final class StringInterpolatorImpl implements StringInterpolator {
         return delegate.replace(input);
     }
 
-    @Override
-    public Map<String, String> interpolate(Map<String, String> inputMap) {
-        return inputMap.entrySet()
-                .stream()
-                .collect(
-                        HashMap::new,
-                        (map, entry) -> map.put(interpolate(entry.getKey()), interpolate(entry.getValue())),
-                        HashMap::putAll
-                );
-    }
-
 }

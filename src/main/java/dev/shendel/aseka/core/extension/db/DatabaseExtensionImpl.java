@@ -101,18 +101,7 @@ public class DatabaseExtensionImpl implements DatabaseExtension {
         checkThat(queries.size() == 1, "Script must content only 1 query");
 
         QueryRunner run = new QueryRunner(currentDataSource);
-        List<Map<String, Object>> rowsInTable = run.query(sqlScript, new MapListHandler());
-        convertMapsToCaseInsensitive(rowsInTable);
-
-        return rowsInTable;
-    }
-
-    private void convertMapsToCaseInsensitive(List<Map<String, Object>> mapList) {
-        mapList.replaceAll(recordMap -> {
-            TreeMap<String, Object> caseInsensitiveMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-            caseInsensitiveMap.putAll(recordMap);
-            return caseInsensitiveMap;
-        });
+        return run.query(sqlScript, new MapListHandler());
     }
 
     @Override
