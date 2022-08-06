@@ -29,15 +29,6 @@ publishing {
             from components.java
         }
     }
-    repositories {
-        maven {
-            url = 'https://repo.shendel.dev/releases'
-            credentials {
-                username = mavenUsername
-                password = mavenPassword
-            }
-        }
-    }
 }
 
 repositories {
