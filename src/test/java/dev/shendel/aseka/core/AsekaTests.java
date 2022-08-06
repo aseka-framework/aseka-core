@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 
 @CucumberOptions(
         features = Constants.DEFAULT_FEATURES,
-        tags = "@AlphaRelease",
+        tags = "@ReadyForTest",
 //        tags = DEFAULT_TAGS,
         glue = Constants.DEFAULT_GLUE,
         plugin = {"pretty", Constants.ALLURE_PLUGIN}
