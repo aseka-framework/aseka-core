@@ -62,7 +62,7 @@ public class AmqpSteps {
         extension.purgeQueue(queueName);
     }
 
-    @RetryableStep(defaultRetrySeconds = "3")
+    @RetryableStep(defaultRetrySeconds = "2")
     @When("check that message in queue {interpolated_string} is {file_path}")
     public void checkMessage(String queueName, String messagePath) {
         String expectedMessage = fileManager.readFileAsString(messagePath);
@@ -70,7 +70,7 @@ public class AmqpSteps {
         checkMessageInternal(queueName, expectedMessage);
     }
 
-    @RetryableStep(defaultRetrySeconds = "3")
+    @RetryableStep(defaultRetrySeconds = "2")
     @When("check that message in queue {interpolated_string} is:")
     public void checkMessage(String queueName, InterpolatedString expectedMessage) {
         checkMessageInternal(queueName, expectedMessage.get());

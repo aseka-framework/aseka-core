@@ -38,7 +38,7 @@ public class KafkaSteps {
         extension.resetOffsetToEnd(topicName);
     }
 
-    @RetryableStep(defaultRetrySeconds = "3")
+    @RetryableStep(defaultRetrySeconds = "2")
     @When("check that message in topic {interpolated_string} is {file_path}")
     public void checkMessage(String topicName, String messagePath) {
         String expectedMessage = fileManager.readFileAsString(messagePath);
@@ -46,7 +46,7 @@ public class KafkaSteps {
         checkMessageInternal(topicName, expectedMessage);
     }
 
-    @RetryableStep(defaultRetrySeconds = "3")
+    @RetryableStep(defaultRetrySeconds = "2")
     @When("check that message in topic {interpolated_string} is:")
     public void checkMessage(String topicName, InterpolatedString expectedMessage) {
         checkMessageInternal(topicName, expectedMessage.get());
