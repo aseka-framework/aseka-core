@@ -72,9 +72,13 @@ public class DockerExtensionImpl implements DockerExtension {
         }
     }
 
-    //TODO add support for all files
     private List<String> getServiceNamesWithHealthcheck(List<File> files) {
-        File composeFile = files.get(0);
+        return files.stream()
+                .flatMap(file -> getServiceNamesWithHealthcheck(file).stream())
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getServiceNamesWithHealthcheck(File composeFile) {
         Map<String, Object> composeFileContent;
 
         try (FileInputStream fileInputStream = FileUtils.openInputStream(composeFile)) {
@@ -84,7 +88,7 @@ public class DockerExtensionImpl implements DockerExtension {
 
             Set<String> serviceNames = services.keySet();
             log.info(
-                    "Found {} services in docker-compose files: {}",
+                    "Found {} services in docker-compose file: {}",
                     serviceNames.size(),
                     String.join(", ", serviceNames)
             );
@@ -92,13 +96,13 @@ public class DockerExtensionImpl implements DockerExtension {
             List<String> serviceNamesWithHealthCheck = services.entrySet().stream()
                     .filter(entry -> {
                         Map<String, Object> serviceParams = (Map<String, Object>) entry.getValue();
-                        return serviceParams.keySet().contains("healthcheck");
+                        return serviceParams.containsKey("healthcheck");
                     })
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
 
             log.info(
-                    "Found {} services with healthcheck in docker-compose files: {}",
+                    "Found {} services with healthcheck in docker-compose file: {}",
                     serviceNamesWithHealthCheck.size(),
                     String.join(", ", serviceNamesWithHealthCheck)
             );
