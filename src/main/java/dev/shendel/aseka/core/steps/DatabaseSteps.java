@@ -20,9 +20,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.hamcrest.Matcher;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +60,19 @@ public class DatabaseSteps {
     public void executeQuery(SqlScriptType scriptType, InterpolatedString sqlScript) {
         this.sqlScript = sqlScript.get();
         executeQuery(scriptType);
+    }
+
+    @When("execute SQL script {file_path}")
+    public void executeQuery(String sqlFilePath) {
+        sqlScript = fileManager.readFileAsString(sqlFilePath);
+        Allure.addAttachment("Sql script", sqlScript);
+        executeQuery(SqlScriptType.ANY);
+    }
+
+    @When("execute SQL script:")
+    public void executeQuery(InterpolatedString sqlScript) {
+        this.sqlScript = sqlScript.get();
+        executeQuery(SqlScriptType.ANY);
     }
 
     private void executeQuery(SqlScriptType method) {

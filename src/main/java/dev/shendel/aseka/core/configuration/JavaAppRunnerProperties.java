@@ -16,6 +16,7 @@ public class JavaAppRunnerProperties {
     private boolean appLoggingEnabled = true;
     private String javaPath;
     private String appPath;
+    //TODO add jvm_opts
     private Map<String, String> environment = new HashMap<>();
     private Map<String, String> appProperties = new HashMap<>();
     private String healthCheckUrl;
