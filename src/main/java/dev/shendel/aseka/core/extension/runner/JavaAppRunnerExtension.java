@@ -22,12 +22,12 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Map;
+import java.util.List;
 import java.util.Queue;
-import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static dev.shendel.aseka.core.util.Asserts.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -97,8 +97,10 @@ public class JavaAppRunnerExtension implements Extension {
                 buildJavaCommand(),
                 "-XX:NativeMemoryTracking=detail",
                 "-jar",
-                properties.getAppPath(),
-                buildAppProperties()
+                properties.getAppPath()
+        );
+        buildAppProperties().forEach(
+                prop -> processBuilder.command().add(prop)
         );
 
         log.info("Executing command: {}", String.join(" ", processBuilder.command()));
@@ -115,13 +117,12 @@ public class JavaAppRunnerExtension implements Extension {
         }
     }
 
-    private String buildAppProperties() {
-        StringJoiner joiner = new StringJoiner(" ", "", "");
-        for (Map.Entry<String, String> property : properties.getAppProperties().entrySet()) {
-            String stringProperty = "--" + property.getKey() + "=" + property.getValue();
-            joiner.add(stringProperty);
-        }
-        return joiner.toString();
+    private List<String> buildAppProperties() {
+        return properties.getAppProperties()
+                .entrySet()
+                .stream()
+                .map(property -> "--" + property.getKey() + "=" + property.getValue())
+                .collect(Collectors.toList());
     }
 
     private void startListenLogs() {
