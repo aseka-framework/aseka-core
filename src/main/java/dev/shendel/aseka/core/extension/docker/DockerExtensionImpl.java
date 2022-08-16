@@ -17,6 +17,8 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +70,12 @@ public class DockerExtensionImpl implements DockerExtension {
     private void findAndRegisterWaitsForHealthchecks(List<File> files) {
         for (String serviceName : getServiceNamesWithHealthcheck(files)) {
             log.info("Docker will wait {} for healthcheck", serviceName);
-            dockerCompose.waitingFor(serviceName, Wait.forHealthcheck());
+            //TODO move to property
+            dockerCompose.waitingFor(
+                    serviceName,
+                    Wait.forHealthcheck()
+                            .withStartupTimeout(Duration.of(5, ChronoUnit.MINUTES))
+            );
         }
     }
 
