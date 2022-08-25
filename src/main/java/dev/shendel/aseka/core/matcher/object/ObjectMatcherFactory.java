@@ -9,29 +9,17 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class ObjectMatcherFactory implements Cleanable {
+
     //TODO add configurations from feature file and properties (ignore extra elements, default object matcher etc.)
+    private ObjectMatcherType currentObjectMatcherType;
 
-    private static final ObjectMatcher DEFAULT_OBJECT_MATCHER = ObjectMatcher.JSON;
-
-    private ObjectMatcher configuredObjectMatcher;
-
-    public void setGlobalMatcher(ObjectMatcher objectMatcher) {
-        configuredObjectMatcher = objectMatcher;
+    public void setObjectMatcherType(ObjectMatcherType objectMatcherType) {
+        currentObjectMatcherType = objectMatcherType;
     }
 
     public Matcher<String> create(String expectedObject) {
-        ObjectMatcher objectMatcher;
-
-        if (configuredObjectMatcher != null) {
-            objectMatcher = configuredObjectMatcher;
-        } else if (isStartsLikeXml(expectedObject)) {
-            objectMatcher = ObjectMatcher.XML;
-        } else {
-            objectMatcher = ObjectMatcher.JSON;
-        }
-
-        log.info("Creating object matcher by type: {}", objectMatcher);
-        switch (objectMatcher) {
+        ObjectMatcherType type = getObjectMatcherType(expectedObject);
+        switch (type) {
             case JSON:
                 return IsEqualJson.isEqualJson(expectedObject);
             case XML:
@@ -41,17 +29,27 @@ public class ObjectMatcherFactory implements Cleanable {
             case EXACT_TEXT:
                 return IsEqualText.isEqualText(true, expectedObject);
             default:
-                throw new AsekaException("Object matcher {} not supported", configuredObjectMatcher);
+                throw new AsekaException("Object matcher {} not supported", currentObjectMatcherType);
         }
     }
 
-    private boolean isStartsLikeXml(String expectedObject) {
+    private ObjectMatcherType getObjectMatcherType(String expectedObject) {
+        if (currentObjectMatcherType != null) {
+            log.info("Object matcher defined manually: {}", currentObjectMatcherType);
+            return currentObjectMatcherType;
+        } else if (isXmlObject(expectedObject)) {
+            return ObjectMatcherType.XML;
+        } else {
+            return ObjectMatcherType.JSON;
+        }
+    }
+
+    private boolean isXmlObject(String expectedObject) {
         return expectedObject.trim().startsWith("<");
     }
 
     @Override
     public void clean() {
-        configuredObjectMatcher = DEFAULT_OBJECT_MATCHER;
+        currentObjectMatcherType = null;
     }
-
 }
