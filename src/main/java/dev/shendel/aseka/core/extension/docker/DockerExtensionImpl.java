@@ -71,11 +71,10 @@ public class DockerExtensionImpl implements DockerExtension {
     private void findAndRegisterWaitsForHealthchecks(List<File> files) {
         for (String serviceName : getServiceNamesWithHealthcheck(files)) {
             log.info("Docker will wait {} for healthcheck", serviceName);
-            //TODO move to property
+            Integer timeout = properties.getHealthcheckWaitTimeoutMinutes();
             dockerCompose.waitingFor(
                     serviceName,
-                    Wait.forHealthcheck()
-                            .withStartupTimeout(Duration.of(5, ChronoUnit.MINUTES))
+                    Wait.forHealthcheck().withStartupTimeout(Duration.of(timeout, ChronoUnit.MINUTES))
             );
         }
     }
