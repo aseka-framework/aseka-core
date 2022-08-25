@@ -12,6 +12,7 @@ import java.util.List;
 public class DockerProperties {
 
     private boolean enabled = false;
+    private String containersNamePrefix = "aseka";
     private List<String> composeFiles;
     private Integer waitAfterStartSeconds = null;
 

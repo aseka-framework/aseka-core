@@ -47,9 +47,10 @@ public class DockerExtensionImpl implements DockerExtension {
             Stopwatch stopwatch = Stopwatch.createStarted();
             log.info("Initializing Docker extension...");
             List<String> filePaths = properties.getComposeFiles();
+            String containersNamePrefix = properties.getContainersNamePrefix();
             log.info("Starting docker containers for files:{}", filePaths);
             List<File> files = getDockerComposeFiles(filePaths);
-            dockerCompose = new DockerComposeContainer(files).withLocalCompose(true);
+            dockerCompose = new DockerComposeContainer(containersNamePrefix, files).withLocalCompose(true);
             findAndRegisterWaitsForHealthchecks(files);
 
             dockerCompose.start();
