@@ -4,9 +4,10 @@ import dev.shendel.aseka.core.configuration.KafkaProperties;
 import dev.shendel.aseka.core.exception.AsekaException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -16,8 +17,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class KafkaExtensionImpl implements KafkaExtension {
 
-    private final Map<String, KafkaTopicClient> topicClients = new HashMap<>();
     private final KafkaProperties kafkaProperties;
+    private final Map<String, KafkaTopicClient> topicClients = new HashMap<>();
+    private final Map<String, Deque<KafkaMessage>> uncommittedMessages = new HashMap<>();
 
     @Override
     public void init() {
@@ -31,6 +33,7 @@ public class KafkaExtensionImpl implements KafkaExtension {
                             topic.getProperties()
                     );
                     topicClients.put(topicName, new KafkaTopicClient(topicName, mergedProperties));
+                    uncommittedMessages.put(topicName, new ArrayDeque<>());
                 }
             }
         }
@@ -56,11 +59,37 @@ public class KafkaExtensionImpl implements KafkaExtension {
     @Override
     public void resetOffsetToEnd(String topicName) {
         getTopicClient(topicName).resetOffsetToEnd();
+        uncommittedMessages.get(topicName).clear();
     }
 
     @Override
-    public @NotNull KafkaMessage receiveMessage(String topicName) {
-        return getTopicClient(topicName).receiveMessage();
+    public KafkaMessage receiveMessage(String topicName) {
+        return pollMessage(topicName);
+    }
+
+    private KafkaMessage pollMessage(String topicName) {
+        Deque<KafkaMessage> topicUncommittedMessages = uncommittedMessages.get(topicName);
+        KafkaMessage messageFromKafka = getTopicClient(topicName).receiveMessage();
+
+        KafkaMessage message = messageFromKafka != null ? messageFromKafka : topicUncommittedMessages.pollFirst();
+
+        if (message != null) topicUncommittedMessages.offerLast(message);
+        return message;
+    }
+
+    @Override
+    public void commitMessage(KafkaMessage message) {
+        uncommittedMessages.forEach((topic, messages) -> {
+            boolean removed = messages.remove(message);
+            if (removed) {
+                log.info("Kafka message committed: {}", message.getUid());
+            }
+        });
+    }
+
+    @Override
+    public void clean() {
+        uncommittedMessages.forEach((topic, messageDeque) -> messageDeque.clear());
     }
 
     private KafkaTopicClient getTopicClient(String topicName) {

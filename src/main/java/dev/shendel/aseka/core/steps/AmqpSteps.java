@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static dev.shendel.aseka.core.util.Asserts.assertThat;
@@ -66,7 +67,6 @@ public class AmqpSteps {
     @When("check that message in queue {interpolated_string} is {file_path}")
     public void checkMessage(String queueName, String messagePath) {
         String expectedMessage = fileManager.readFileAsString(messagePath);
-        Allure.addAttachment("expectedMessage", expectedMessage);
         checkMessageInternal(queueName, expectedMessage);
     }
 
@@ -76,10 +76,18 @@ public class AmqpSteps {
         checkMessageInternal(queueName, expectedMessage.get());
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void checkMessageInternal(String queueName, String expectedMessage) {
         MqMessage actualMessage = extension.receiveMessage(queueName);
+        Allure.addAttachment("expectedMessage", expectedMessage);
+        Allure.addAttachment(
+                "actualMessage",
+                Optional.ofNullable(actualMessage).map(MqMessage::getBody).orElse("null")
+        );
         log.info("Checking actual message: {}", actualMessage);
+        assertThat(actualMessage != null, "Don't have messages in queue {}", queueName);
         assertThat(actualMessage.getBody(), objectMatcherFactory.create(expectedMessage));
+        extension.commitMessage(actualMessage);
     }
 
 }

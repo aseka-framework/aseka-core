@@ -3,6 +3,7 @@ package dev.shendel.aseka.core.extension.kafka;
 import dev.shendel.aseka.core.exception.AsekaException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -10,13 +11,13 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.header.Header;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,7 +27,7 @@ import static com.google.common.collect.Lists.newArrayList;
 @Getter
 public class KafkaTopicClient implements Closeable {
 
-    private static final Integer DEFAULT_TIMEOUT = 3000;
+    private static final Integer DEFAULT_POLL_TIMEOUT = 140;
 
     private final String topicName;
     private final KafkaProducer<Object, String> producer;
@@ -38,11 +39,10 @@ public class KafkaTopicClient implements Closeable {
         producer = new KafkaProducer<>(buildProducerProps(properties));
         consumer = new KafkaConsumer<>(buildConsumerProps(properties));
 
+        log.info("Subscribing to topic: {}", topicName);
         consumer.subscribe(newArrayList(topicName));
-        log.info("Resetting offset to end...");
+        waitUntilAssigned(topicName);
         resetOffsetToEnd();
-        logOffsets(topicName);
-        log.info("Finished resetting offset");
     }
 
     private Properties buildProducerProps(Map<String, String> properties) {
@@ -61,6 +61,8 @@ public class KafkaTopicClient implements Closeable {
         resultProperties.put("enable.auto.commit", "true");
         resultProperties.put("auto.commit.interval.ms", "100");
         resultProperties.put("max.poll.interval.ms", "300000");
+        resultProperties.put("heartbeat.interval.ms", "200");
+        resultProperties.put("auto.offset.reset", "earliest");
         resultProperties.put("group.id", "tests-" + topicName);
 
         resultProperties.putAll(properties);
@@ -69,14 +71,18 @@ public class KafkaTopicClient implements Closeable {
         return resultProperties;
     }
 
-    private void logOffsets(String topicName) {
+    private void waitUntilAssigned(String topicName) {
+        StopWatch stopWatch = StopWatch.createStarted();
+        //https://www.smilecdr.com/our-blog/kafka-integration-testing-partition-assignment
+        //use this because we need block until all partitions assigned
+        consumer.poll(DEFAULT_POLL_TIMEOUT);
         Set<TopicPartition> topicPartitions = consumer.assignment();
         Map<TopicPartition, Long> endOffsets = consumer.endOffsets(topicPartitions);
         for (TopicPartition partition : topicPartitions) {
-            long position = consumer.position(partition, Duration.ofMillis(DEFAULT_TIMEOUT));
-
+            long position = consumer.position(partition, Duration.ofMillis(DEFAULT_POLL_TIMEOUT));
             log.info(
-                    "Topic info: topicName:{}, partition:{}, offset: {}, position: {}",
+                    "Assigned to topic in {} ms. topicName:{}, partition:{}, offset: {}, position: {}",
+                    stopWatch.getTime(TimeUnit.MILLISECONDS),
                     topicName,
                     partition.partition(),
                     endOffsets.get(partition),
@@ -91,10 +97,19 @@ public class KafkaTopicClient implements Closeable {
 
     public void resetOffsetToEnd() {
         boolean resetFinished = false;
+        int skippedMessages = 0;
+        StopWatch stopWatch = StopWatch.createStarted();
         while (!resetFinished) {
-            ConsumerRecords<Object, String> records = consumer.poll(Duration.ofMillis(DEFAULT_TIMEOUT));
+            ConsumerRecords<Object, String> records = consumer.poll(Duration.ofMillis(DEFAULT_POLL_TIMEOUT));
+            skippedMessages = skippedMessages + records.count();
             resetFinished = records.isEmpty();
         }
+        log.info(
+                "Topic '{}' offset reset in {} ms. Skipped messages count: {}",
+                topicName,
+                stopWatch.getTime(TimeUnit.MILLISECONDS),
+                skippedMessages
+        );
     }
 
     @Override
@@ -103,10 +118,10 @@ public class KafkaTopicClient implements Closeable {
         producer.close();
     }
 
-    public @NotNull KafkaMessage receiveMessage() {
-        ConsumerRecords<Object, String> records = consumer.poll(Duration.ofMillis(DEFAULT_TIMEOUT));
+    public KafkaMessage receiveMessage() {
+        ConsumerRecords<Object, String> records = consumer.poll(Duration.ofMillis(DEFAULT_POLL_TIMEOUT));
         if (records.isEmpty()) {
-            return KafkaMessage.empty();
+            return null;
         } else if (records.count() == 1) {
             ConsumerRecord<Object, String> record = records.iterator().next();
             return KafkaMessage.of(record.value(), record.offset(), getHeaders(record));

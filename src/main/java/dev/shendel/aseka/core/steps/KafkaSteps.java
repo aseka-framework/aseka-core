@@ -11,6 +11,8 @@ import io.qameta.allure.Allure;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Optional;
+
 import static dev.shendel.aseka.core.util.Asserts.assertThat;
 
 @Slf4j
@@ -52,10 +54,18 @@ public class KafkaSteps {
         checkMessageInternal(topicName, expectedMessage.get());
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void checkMessageInternal(String topicName, String expectedMessage) {
         KafkaMessage actualMessage = extension.receiveMessage(topicName);
+        Allure.addAttachment("expectedMessage", expectedMessage);
+        Allure.addAttachment(
+                "actualMessage",
+                Optional.ofNullable(actualMessage).map(KafkaMessage::getBody).orElse("null")
+        );
         log.info("Checking actual message: {}", actualMessage);
+        assertThat(actualMessage != null, "Don't have messages in topic {}", topicName);
         assertThat(actualMessage.getBody(), objectMatcherFactory.create(expectedMessage));
+        extension.commitMessage(actualMessage);
     }
 
 }

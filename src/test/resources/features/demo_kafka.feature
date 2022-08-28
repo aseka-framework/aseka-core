@@ -6,15 +6,20 @@
 @AlphaRelease
 Feature: Kafka examples
 
+  Background:
+    Given set variables:
+      | randomId | ${{randomLong:5}} |
+
+  @DemoKafka
   Example: Send and check message to kafka (JSON)
     Given reset offset to end for topic 'test.topic'
     When send to topic 'test.topic' message:
     """
-    {"test":"51351"}
+    {"test":"${{randomId}}"}
     """
     Then check that message in topic 'test.topic' is:
     """
-    {"test":"51351"}
+    {"test":"${{randomId}}"}
     """
 
   Example: Send and check message to kafka (XML)
@@ -26,7 +31,6 @@ Feature: Kafka examples
       <body>Don't forget me this weekend!</body>
     </note>
     """
-    And set global matcher XML
     Then check that message in topic 'test.topic' is:
     """
     <?xml version="1.0" encoding="UTF-8"?>

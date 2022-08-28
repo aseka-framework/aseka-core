@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Configuration
@@ -38,6 +39,11 @@ public class AmqpProperties {
                 .filter(queue -> queue.getName().equals(name))
                 .findFirst()
                 .orElseThrow(() -> new AsekaException("Invalid mq properties. Can't find queue with name: `{}`", name));
+    }
+
+    public List<Queue> getAllQueues() {
+        return brokers.stream().flatMap(broker -> broker.getQueues().stream())
+                .collect(Collectors.toList());
     }
 
 }

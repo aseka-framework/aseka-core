@@ -26,7 +26,6 @@ Feature: RabbitMq examples
       <body>Don't forget me this weekend!</body>
     </note>
     """
-    And set global matcher XML
     Then check that message in queue 'message.update' is:
     """
     <?xml version="1.0" encoding="UTF-8"?>

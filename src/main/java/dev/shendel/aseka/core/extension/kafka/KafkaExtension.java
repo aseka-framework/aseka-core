@@ -1,7 +1,8 @@
 package dev.shendel.aseka.core.extension.kafka;
 
 import dev.shendel.aseka.core.api.Extension;
-import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
 
 public interface KafkaExtension extends Extension {
 
@@ -15,7 +16,12 @@ public interface KafkaExtension extends Extension {
 
     void resetOffsetToEnd(String topicName);
 
-    //TODO think about returning null
-    @NotNull KafkaMessage receiveMessage(String topicName);
+    @Nullable
+    KafkaMessage receiveMessage(String topicName);
+
+    void commitMessage(KafkaMessage message);
+
+    @Override
+    void clean();
 
 }

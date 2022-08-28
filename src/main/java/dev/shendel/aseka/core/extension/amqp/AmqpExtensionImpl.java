@@ -12,7 +12,11 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Slf4j
@@ -22,6 +26,7 @@ public class AmqpExtensionImpl implements AmqpExtension {
 
     private final AmqpProperties properties;
     private final List<AmqpAdapter> adapters;
+    private final Map<String, Deque<MqMessage>> uncommittedMessages = new HashMap<>();
 
     @Override
     @SneakyThrows
@@ -30,6 +35,8 @@ public class AmqpExtensionImpl implements AmqpExtension {
             log.info("Initializing AMQP extension...");
             validateProperties();
             adapters.forEach(AmqpAdapter::prepareBrokers);
+            properties.getAllQueues()
+                    .forEach(queue -> uncommittedMessages.put(queue.getName(), new ArrayDeque<>()));
         }
     }
 
@@ -41,11 +48,32 @@ public class AmqpExtensionImpl implements AmqpExtension {
     @Override
     public void purgeQueue(String queueName) {
         getAdapterFor(queueName).purgeQueue(queueName);
+        uncommittedMessages.get(queueName).clear();
     }
 
     @Override
     public MqMessage receiveMessage(String queueName) {
-        return getAdapterFor(queueName).receiveMessage(queueName);
+        return pollMessage(queueName);
+    }
+
+    @Override
+    public void commitMessage(MqMessage message) {
+        uncommittedMessages.forEach((topic, messageDeque) -> {
+            boolean removed = messageDeque.remove(message);
+            if (removed) {
+                log.info("Mq message committed: {}", message.getUid());
+            }
+        });
+    }
+
+    private MqMessage pollMessage(String queueName) {
+        Deque<MqMessage> queueUncommittedMessages = uncommittedMessages.get(queueName);
+        MqMessage messageFromMq = getAdapterFor(queueName).receiveMessage(queueName);
+
+        MqMessage message = messageFromMq != null ? messageFromMq : queueUncommittedMessages.pollFirst();
+
+        if (message != null) queueUncommittedMessages.offerLast(message);
+        return message;
     }
 
     private AmqpAdapter getAdapterFor(String queueName) {
@@ -59,6 +87,11 @@ public class AmqpExtensionImpl implements AmqpExtension {
     @Override
     public void destroy() {
         adapters.forEach(AmqpAdapter::destroyBrokers);
+    }
+
+    @Override
+    public void clean() {
+        uncommittedMessages.forEach((queue, messages) -> messages.clear());
     }
 
     //TODO check all properties is valid

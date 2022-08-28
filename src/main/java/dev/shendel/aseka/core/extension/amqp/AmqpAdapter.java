@@ -4,6 +4,8 @@ import dev.shendel.aseka.core.extension.amqp.model.MessageProperties;
 import dev.shendel.aseka.core.extension.amqp.model.MqMessage;
 import dev.shendel.aseka.core.extension.amqp.model.AmqpBrokerType;
 
+import javax.annotation.Nullable;
+
 public interface AmqpAdapter {
 
     boolean supports(AmqpBrokerType type);
@@ -12,6 +14,7 @@ public interface AmqpAdapter {
 
     void purgeQueue(String queueName);
 
+    @Nullable
     MqMessage receiveMessage(String queueName);
 
     void prepareBrokers();

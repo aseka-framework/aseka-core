@@ -100,7 +100,7 @@ public class RabbitMqAdapter implements AmqpAdapter {
         try {
             return Optional.ofNullable(channel.basicGet(queueName, true))
                     .map(response -> MqMessage.of(new String(response.getBody()), new HashMap<>()))
-                    .orElse(MqMessage.empty());
+                    .orElse(null);
         } catch (IOException exception) {
             throw new AsekaException("Error receive message '{}'", exception, queueName);
         }
