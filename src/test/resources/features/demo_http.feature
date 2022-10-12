@@ -28,7 +28,6 @@ Feature: HTTP examples
     When send request POST:'' with body 'data/demo/http/sum_request.xml'
     Then check that response code == 200
     And check that response is not empty
-    And set global matcher XML
     And check that response body is 'data/demo/http/sum_response.xml'
 
     # Alternative way comparing body
