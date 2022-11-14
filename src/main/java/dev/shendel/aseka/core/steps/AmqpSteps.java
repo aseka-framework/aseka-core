@@ -39,6 +39,11 @@ public class AmqpSteps {
         messageProperties = new MessageProperties();
     }
 
+    @When("set mq message content-type {interpolated_string}")
+    public void setContentType(String contentType) {
+        messageProperties.setContentType(contentType);
+    }
+
     @When("set mq message headers:")
     public void setMessageHeaders(List<Pair> headers) {
         Map<String, String> headersMap = headers.stream()
