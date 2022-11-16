@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -66,7 +67,9 @@ public class RabbitMqAdapter implements AmqpAdapter {
                     props.getContentEncoding(),
                     new HashMap<String, Object>() {
                         {
-                            putAll(props.getHeaders());
+                            if (Objects.nonNull(props.getHeaders())) {
+                                putAll(props.getHeaders());
+                            }
                         }
                     },
                     props.getDeliveryMode(),

@@ -64,7 +64,7 @@ repositories {
 
 //add dependency
 dependencies {
-    implementation 'dev.shendel:aseka-core:0.0.2'
+    implementation 'dev.shendel:aseka-core:0.0.3'
 }
 ```
 
