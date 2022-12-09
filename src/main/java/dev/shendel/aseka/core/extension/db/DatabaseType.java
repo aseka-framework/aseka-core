@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum DatabaseType {
     ORACLE("oracle.jdbc.OracleDriver"),
     POSTGRES("org.postgresql.Driver"),
-    SQL_SERVER("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+    SQL_SERVER("com.microsoft.sqlserver.jdbc.SQLServerDriver"),
+    H2("org.h2.Driver");
 
     private final String driverName;
 
