@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static dev.shendel.aseka.core.util.Asserts.assertThat;
+import static dev.shendel.aseka.core.util.Asserts.assertTrue;
+import static dev.shendel.aseka.core.matcher.NotMatcher.not;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -69,6 +71,13 @@ public class AmqpSteps {
     }
 
     @RetryableStep(defaultRetrySeconds = "2")
+    @When("check queue {interpolated_string} is empty")
+    public void checkQueueIsEmpty(String queueName) {
+        MqMessage actualMessage = extension.receiveMessage(queueName);
+        assertTrue(actualMessage == null, "Queue is not empty: " + getReplace(queueName));
+    }
+
+    @RetryableStep(defaultRetrySeconds = "2")
     @When("check that message in queue {interpolated_string} is {file_path}")
     public void checkMessage(String queueName, String messagePath) {
         String expectedMessage = fileManager.readFileAsString(messagePath);
@@ -76,9 +85,22 @@ public class AmqpSteps {
     }
 
     @RetryableStep(defaultRetrySeconds = "2")
+    @When("check that not exist message in queue {interpolated_string} is {file_path}")
+    public void checkNotExistMessage(String queueName, String messagePath) {
+        String expectedMessage = fileManager.readFileAsString(messagePath);
+        checkNotExistMessageInternal(queueName, expectedMessage);
+    }
+
+    @RetryableStep(defaultRetrySeconds = "2")
     @When("check that message in queue {interpolated_string} is:")
     public void checkMessage(String queueName, InterpolatedString expectedMessage) {
         checkMessageInternal(queueName, expectedMessage.get());
+    }
+
+    @RetryableStep(defaultRetrySeconds = "2")
+    @When("check that not exist message in queue {interpolated_string} is:")
+    public void checkNotExistMessage(String queueName, InterpolatedString expectedMessage) {
+        checkNotExistMessageInternal(queueName, expectedMessage.get());
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -90,9 +112,30 @@ public class AmqpSteps {
                 Optional.ofNullable(actualMessage).map(MqMessage::getBody).orElse("null")
         );
         log.info("Checking actual message: {}", actualMessage);
-        assertThat(actualMessage != null, "Don't have messages in queue {}", queueName);
+        assertThat(actualMessage != null, "Don't have messages in queue: " + getReplace(queueName));
         assertThat(actualMessage.getBody(), objectMatcherFactory.create(expectedMessage));
         extension.commitMessage(actualMessage);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private void checkNotExistMessageInternal(String queueName, String expectedMessage) {
+        MqMessage actualMessage = extension.receiveMessage(queueName);
+        Allure.addAttachment("expectedMessage", expectedMessage);
+        Allure.addAttachment("actualMessage",
+                Optional.ofNullable(actualMessage).map(MqMessage::getBody).orElse("null")
+        );
+        log.info("Checking actual message: {}", actualMessage);
+        if(actualMessage == null) {
+            assertTrue(actualMessage == null, "Queue is not empty: " + getReplace(queueName));
+        } else {
+            assertThat(actualMessage.getBody(), not(objectMatcherFactory.create(expectedMessage)),
+                    "Unexpected message found in queue: " + getReplace(queueName));
+        }
+        extension.commitMessage(actualMessage);
+    }
+
+    private static String getReplace(String queueName) {
+        return queueName.replace("$", "\\$");
     }
 
 }
