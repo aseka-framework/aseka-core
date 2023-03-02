@@ -63,6 +63,7 @@ dependencies {
     api 'com.oracle.ojdbc:orai18n:19.3.0.0'
     api 'com.microsoft.sqlserver:mssql-jdbc:9.4.1.jre8'
     api 'org.postgresql:postgresql:42.3.1'
+    api 'com.h2database:h2:1.4.200'
     api 'com.zaxxer:HikariCP:4.0.3'
     api 'commons-dbutils:commons-dbutils:1.7'
 
