@@ -17,7 +17,7 @@ public class ObjectMatcherFactory implements Cleanable {
         currentObjectMatcherType = objectMatcherType;
     }
 
-    public Matcher<String> create(String expectedObject) {
+    public Matcher<String> isEqualObject(String expectedObject) {
         ObjectMatcherType type = getObjectMatcherType(expectedObject);
         switch (type) {
             case JSON:

@@ -64,7 +64,7 @@ public class KafkaSteps {
         );
         log.info("Checking actual message: {}", actualMessage);
         assertThat(actualMessage != null, "Don't have messages in topic {}", topicName);
-        assertThat(actualMessage.getBody(), objectMatcherFactory.create(expectedMessage));
+        assertThat(actualMessage.getBody(), objectMatcherFactory.isEqualObject(expectedMessage));
         extension.commitMessage(actualMessage);
     }
 

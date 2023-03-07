@@ -130,28 +130,30 @@ public class CommonSteps {
 
     @StepExecutorIgnore
     @When("---- retry {int} second(s)")
-    public void startRetryStepsChainV2(int retryNoLongerThan) {
-        stepChainExecutor.enable(retryNoLongerThan);
+    public void startRetryStepsChainV2(int maxRetrySeconds) {
+        stepChainExecutor.setMaxRetrySeconds(maxRetrySeconds);
+        stepChainExecutor.startCollectingSteps();
     }
 
     @StepExecutorIgnore
     @When("---- end retryable block")
     public void stopStepsChainV2() {
-        stepChainExecutor.execute();
+        stepChainExecutor.executeCollectedSteps();
     }
 
     @Deprecated
     @StepExecutorIgnore
     @When("---- start retryable steps block. Retry no longer than {int} second(s).")
-    public void startRetryStepsChain(int retryNoLongerThan) {
-        stepChainExecutor.enable(retryNoLongerThan);
+    public void startRetryStepsChain(int maxRetrySeconds) {
+        stepChainExecutor.setMaxRetrySeconds(maxRetrySeconds);
+        stepChainExecutor.startCollectingSteps();
     }
 
     @Deprecated
     @StepExecutorIgnore
     @When("---- end retryable steps block")
     public void stopStepsChain() {
-        stepChainExecutor.execute();
+        stepChainExecutor.executeCollectedSteps();
     }
 
     @Then("files {file_path} and {file_path} is equal")

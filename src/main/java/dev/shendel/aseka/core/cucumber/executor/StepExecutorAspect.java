@@ -35,11 +35,13 @@ public class StepExecutorAspect {
             "&& !@annotation(dev.shendel.aseka.core.cucumber.executor.StepExecutorIgnore)")
     public Object addStepsToExecutor(ProceedingJoinPoint joinPoint) {
         validateStep(joinPoint);
-        if (stepChainExecutor.isEnabled()) {
+        if (stepChainExecutor.isActive()) {
             stepChainExecutor.addStep(wrapToRunnable(joinPoint));
         } else if (isRetryable(joinPoint)) {
             int retrySeconds = getRetrySeconds(joinPoint);
-            RetryExecutor.of(retrySeconds).execute(Unchecked.runnable(joinPoint::proceed));
+            RetryExecutor.of(retrySeconds)
+                         .retryExceptions(AssertionError.class)
+                         .execute(Unchecked.runnable(joinPoint::proceed));
         } else {
             joinPoint.proceed();
         }

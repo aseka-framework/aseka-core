@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'dev.shendel'
-version '0.0.4'
+version '0.0.5'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -21,6 +21,10 @@ allure {
 java {
     withJavadocJar()
     withSourcesJar()
+}
+
+test {
+    useJUnitPlatform()
 }
 
 publishing {
