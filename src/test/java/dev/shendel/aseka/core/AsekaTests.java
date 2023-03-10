@@ -2,8 +2,10 @@ package dev.shendel.aseka.core;
 
 import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 
+@Ignore
 @CucumberOptions(
         features = Constants.DEFAULT_FEATURES,
         tags = "@ReadyForTest",

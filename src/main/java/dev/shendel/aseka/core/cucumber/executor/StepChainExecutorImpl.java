@@ -1,12 +1,13 @@
 package dev.shendel.aseka.core.cucumber.executor;
 
 import dev.shendel.aseka.core.service.RetryExecutor;
-import dev.shendel.aseka.core.util.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static dev.shendel.aseka.core.util.Validator.checkThat;
 
 
 @Slf4j
@@ -14,45 +15,48 @@ import java.util.List;
 public final class StepChainExecutorImpl implements StepChainExecutor {
 
     private final List<RunnableStep> steps = new ArrayList<>();
-    private int retrySeconds = 1;
-    private boolean enabled = false;
+    private int maxRetrySeconds = 1;
+    private boolean active = false;
 
     @Override
-    public void enable(Integer retrySeconds) {
-        if (!enabled) {
-            resetState();
+    public boolean isActive() {
+        return active;
+    }
+
+    @Override
+    public void startCollectingSteps() {
+        if (!active) {
+            steps.clear();
         }
-        this.retrySeconds = retrySeconds;
-        enabled = true;
+        active = true;
     }
 
     @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    @Override
-    public void addStep(RunnableStep step) {
-        Validator.checkThat(enabled, "Can't add step to chain. Executor disabled");
-        steps.add(step);
-    }
-
-    @Override
-    public void execute() {
-        enabled = false;
+    public void executeCollectedSteps() {
+        active = false;
         RetryExecutor
-                .of(retrySeconds)
+                .of(maxRetrySeconds)
+                .retryExceptions(AssertionError.class)
                 .execute(() -> steps.forEach(Runnable::run));
-        log.info("Executed {} steps.", steps.size());
-    }
 
-    private void resetState() {
+        log.info("{} steps was executed", steps.size());
         steps.clear();
     }
 
     @Override
+    public void setMaxRetrySeconds(Integer maxRetrySeconds) {
+        this.maxRetrySeconds = maxRetrySeconds;
+    }
+
+    @Override
+    public void addStep(RunnableStep step) {
+        checkThat(active, "executor is not active");
+        steps.add(step);
+    }
+
+    @Override
     public void clean() {
-        Validator.checkThat(!enabled, "Step chain not executed");
+        checkThat(!active, "Step chain not executed");
     }
 
 }

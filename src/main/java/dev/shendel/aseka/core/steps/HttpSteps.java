@@ -219,12 +219,12 @@ public class HttpSteps {
     public void checkBodyWithGlobalMatcher(String filePath) {
         String expected = fileManager.readFileAsString(filePath);
         Allure.addAttachment("expected", expected);
-        validatableResponse.assertThat().body(objectMatcherFactory.create(expected));
+        validatableResponse.assertThat().body(objectMatcherFactory.isEqualObject(expected));
     }
 
     @Then("check that response body is:")
     public void checkBodyWithGlobalMatcher(InterpolatedString expected) {
-        validatableResponse.assertThat().body(objectMatcherFactory.create(expected.get()));
+        validatableResponse.assertThat().body(objectMatcherFactory.isEqualObject(expected.get()));
     }
 
 }

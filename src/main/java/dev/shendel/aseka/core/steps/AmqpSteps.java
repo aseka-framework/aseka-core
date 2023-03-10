@@ -112,8 +112,8 @@ public class AmqpSteps {
                 Optional.ofNullable(actualMessage).map(MqMessage::getBody).orElse("null")
         );
         log.info("Checking actual message: {}", actualMessage);
-        assertThat(actualMessage != null, "Don't have messages in queue: " + getReplace(queueName));
-        assertThat(actualMessage.getBody(), objectMatcherFactory.create(expectedMessage));
+        assertThat(actualMessage != null, "Don't have messages in queue {}", queueName);
+        assertThat(actualMessage.getBody(), objectMatcherFactory.isEqualObject(expectedMessage));
         extension.commitMessage(actualMessage);
     }
 
