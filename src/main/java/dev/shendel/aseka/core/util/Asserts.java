@@ -35,9 +35,9 @@ public class Asserts {
         }
     }
 
-    public static void assertTrue(boolean condition, String message) {
+    public static void assertTrue(boolean condition, String message, Object... args) {
         if ( !condition ) {
-            throw new AssertionError(StringUtil.format(message));
+            throwAssert(message, args);
         }
     }
 
