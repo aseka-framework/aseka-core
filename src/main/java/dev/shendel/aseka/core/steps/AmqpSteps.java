@@ -20,11 +20,11 @@ import static org.hamcrest.Matchers.not;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static dev.shendel.aseka.core.util.Asserts.assertThat;
-import static dev.shendel.aseka.core.util.Asserts.assertTrue;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -71,13 +71,13 @@ public class AmqpSteps {
         extension.purgeQueue(queueName);
     }
 
-    @When("check queue {interpolated_string} is empty for {int} s")
+    @When("check that queue {interpolated_string} is empty for {int} sec")
     public void checkQueueIsEmpty(String queueName, Integer seconds) {
         RetryExecutor.of(seconds)
                 .retryUntilTheEnd()
                 .execute(() -> {
                     MqMessage actualMessage = extension.receiveMessage(queueName);
-                    assertTrue(actualMessage == null, "Queue is not empty: {}", queueName);
+                    assertThat(actualMessage == null, "Queue is not empty: {}", queueName);
                 });
     }
 
@@ -88,8 +88,7 @@ public class AmqpSteps {
         checkMessageInternal(queueName, expectedMessage);
     }
 
-    @RetryableStep(defaultRetrySeconds = "2")
-    @When("check that not exist message in queue {interpolated_string} for {int} s is {file_path}")
+    @When("check that message not found in queue {interpolated_string} for {int} sec. message: {file_path}")
     public void checkNotExistMessage(String queueName, Integer seconds, String messagePath) {
         String expectedMessage = fileManager.readFileAsString(messagePath);
         checkNotExistMessageInternal(queueName, seconds, expectedMessage);
@@ -101,8 +100,7 @@ public class AmqpSteps {
         checkMessageInternal(queueName, expectedMessage.get());
     }
 
-    @RetryableStep(defaultRetrySeconds = "2")
-    @When("check that not exist message in queue {interpolated_string} for {int} s is:")
+    @When("check that not exist message in queue {interpolated_string} for {int} sec. message:")
     public void checkNotExistMessage(String queueName, Integer seconds, InterpolatedString expectedMessage) {
         checkNotExistMessageInternal(queueName, seconds, expectedMessage.get());
     }
@@ -133,9 +131,7 @@ public class AmqpSteps {
                             Optional.ofNullable(actualMessage).map(MqMessage::getBody).orElse("null"));
 
                     log.info("Checking actual message: {}", actualMessage);
-                    if(actualMessage == null) {
-                        assertTrue(actualMessage == null, "Queue is not empty: {}", queueName);
-                    } else {
+                    if (Objects.nonNull(actualMessage)) {
                         assertThat(actualMessage.getBody(), not(objectMatcherFactory.isEqualObject(expectedMessage)),
                                 "Unexpected message found in queue: {}", queueName);
                     }

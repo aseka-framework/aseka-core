@@ -35,12 +35,6 @@ public class Asserts {
         }
     }
 
-    public static void assertTrue(boolean condition, String message, Object... args) {
-        if ( !condition ) {
-            throwAssert(message, args);
-        }
-    }
-
     private static void throwAssert(String message, Object[] args) {
         throw new AssertionError(StringUtil.format(message, args));
     }
