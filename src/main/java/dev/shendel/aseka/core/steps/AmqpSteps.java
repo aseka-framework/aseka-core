@@ -100,7 +100,7 @@ public class AmqpSteps {
         checkMessageInternal(queueName, expectedMessage.get());
     }
 
-    @When("check that not exist message in queue {interpolated_string} for {int} sec. message:")
+    @When("check that message not found in queue {interpolated_string} for {int} sec. message:")
     public void checkNotExistMessage(String queueName, Integer seconds, InterpolatedString expectedMessage) {
         checkNotExistMessageInternal(queueName, seconds, expectedMessage.get());
     }
