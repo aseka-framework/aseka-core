@@ -8,13 +8,12 @@ import org.xml.sax.InputSource;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.diff.DefaultNodeMatcher;
 import org.xmlunit.diff.Diff;
-import org.xmlunit.diff.DifferenceEvaluators;
 import org.xmlunit.diff.NodeMatcher;
+import org.xmlunit.placeholder.PlaceholderDifferenceEvaluator;
 
 import javax.xml.parsers.SAXParserFactory;
 import java.io.StringReader;
 
-import static dev.shendel.aseka.core.matcher.object.IsEqualJson.DEFAULT_JSON_UNIT_CFG;
 import static org.xmlunit.diff.ElementSelectors.byName;
 import static org.xmlunit.diff.ElementSelectors.byNameAndText;
 
@@ -55,11 +54,7 @@ public class IsEqualXml extends TypeSafeMatcher<String> {
                     .ignoreWhitespace()
                     .normalizeWhitespace()
                     .checkForSimilar()
-                    .withDifferenceEvaluator(
-                            DifferenceEvaluators.chain(
-                                    DifferenceEvaluators.Default,
-                                    new PlaceholderSupportDiffEvaluator(DEFAULT_JSON_UNIT_CFG)
-                            ))
+                    .withDifferenceEvaluator(new PlaceholderDifferenceEvaluator()) // You can now use ${xmlunit.ignore} to ignore some xml attributes from comparing
                     .build();
 
             if (!diff.hasDifferences()) {
